@@ -6,9 +6,25 @@ The UI components can be found in `static/javascripts/ui_components`.
 
 The back-end is a Python app, found in `app.py`.
 
-## Tutorial
+## Project Test Criteria
+
+For this test project, you will modify this sample chat to be written in Apollo instead of plain React. The project will need to be written in Apollo, not plain React and Pusher.com will be the websocket.
+
+For more information using Apollo subscriptions please read:
+http://dev.apollodata.com/react/subscriptions.html
+
+**Time limit:**
+4 hours
+
+**Finished project:**
+Clone this repo and provide a link to the final solution
+
+
+## Example Tutorial
 
 There is a full tutorial on [building a real-time chat application with React and Pusher](https://blog.pusher.com/making-reactjs-realtime-with-websockets/) available.
+
+You can see a demo here: http://pusher-chat-demo.herokuapp.com/
 
 ## Running the App
 
