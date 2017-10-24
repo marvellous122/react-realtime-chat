@@ -8,17 +8,16 @@ The back-end is a Python app, found in `app.py`.
 
 ## Project Test Criteria
 
-For this test project, you will modify this sample chat to be written in Apollo instead of plain React. The project will need to be written in Apollo, not plain React and Pusher.com will be the websocket.
+For this test project, you will modify this sample project to be written in Apollo instead of plain React. The chat websockets will be powered by Pusher.com.
 
 For more information using Apollo subscriptions please read:
 http://dev.apollodata.com/react/subscriptions.html
 
 **Time limit:**
-4 hours
+5 hours
 
 **Finished project:**
 Clone this repo and provide a link to the final solution
-
 
 ## Example Tutorial
 
