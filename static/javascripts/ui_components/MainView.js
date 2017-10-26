@@ -1,3 +1,19 @@
+import { ApolloClient, createNetworkInterface } from 'react-apollo';
+import { SubscriptionClient, addGraphQLSubscriptions } from 'subscriptions-transport-ws';
+// Create a normal network interface:
+const networkInterface = createNetworkInterface({
+  uri: 'http://localhost:3000/graphql'
+});
+// Extend the network interface with the WebSocket
+const networkInterfaceWithSubscriptions = addGraphQLSubscriptions(
+  networkInterface,
+  wsClient
+);
+// Finally, create your ApolloClient instance with the modified network interface
+const client = new ApolloClient({
+  networkInterface: networkInterfaceWithSubscriptions
+});
+
 var MainView = React.createClass({
 
   getInitialState: function() {
@@ -16,9 +32,18 @@ var MainView = React.createClass({
     };
   },
 
+  static propTypes = {
+        repoFullName: PropTypes.string.isRequired,
+        subscribeToNewComments: PropTypes.func.isRequired,
+  }
+
   componentWillMount: function() {
 
-    this.pusher = new Pusher(PUSHER_CHAT_APP_KEY);
+    this.props.subscribeToNewComments({
+        repoFullName: this.props.repoFullName,
+    });
+
+    this.pusher = new Pusher('870b3fc24a21fcd04306');
     this.chatRoom = this.pusher.subscribe('messages');
 
   },
@@ -101,23 +126,64 @@ var MainView = React.createClass({
     );
 
     return (
-      <div style={style} className="text-center">
-        <div className="marvel-device iphone6 silver">
-            <div className="top-bar"></div>
-            <div className="sleep"></div>
-            <div className="volume"></div>
-            <div className="camera"></div>
-            <div className="sensor"></div>
-            <div className="speaker"></div>
-            <div className="screen">
-                {body}
-            </div>
-            <div className="home"></div>
-            <div className="bottom-bar"></div>
+      <ApolloProvider client={client}>
+        <div style={style} className="text-center">
+          <div className="marvel-device iphone6 silver">
+              <div className="top-bar"></div>
+              <div className="sleep"></div>
+              <div className="volume"></div>
+              <div className="camera"></div>
+              <div className="sensor"></div>
+              <div className="speaker"></div>
+              <div className="screen">
+                  {body}
+              </div>
+              <div className="home"></div>
+              <div className="bottom-bar"></div>
+          </div>
         </div>
-      </div>
-
+      </ApolloProvider>
     );
   }
 
+});
+
+const COMMENTS_SUBSCRIPTION = gql`
+    subscription onCommentAdded($repoFullName: String!){
+      commentAdded(repoFullName: $repoFullName){
+        id
+        content
+      }
+    }
+`;
+const withData = graphql(COMMENT_QUERY, {
+    name: 'comments',
+    options: ({ params }) => ({
+        variables: {
+            repoName: `${params.org}/${params.repoName}`
+        },
+    }),
+    props: props => {
+        return {
+            subscribeToNewComments: params => {
+                return props.comments.subscribeToMore({
+                    document: COMMENTS_SUBSCRIPTION,
+                    variables: {
+                        repoName: params.repoFullName,
+                    },
+                    updateQuery: (prev, {subscriptionData}) => {
+                        if (!subscriptionData.data) {
+                            return prev;
+                        }
+                        const newFeedItem = subscriptionData.data.commentAdded;
+                        return Object.assign({}, prev, {
+                            entry: {
+                                comments: [newFeedItem, ...prev.entry.comments]
+                            }
+                        });
+                    }
+                });
+            }
+        };
+    },
 });
